@@ -4,15 +4,25 @@
 #include <SNTPtime.h> //https://github.com/SensorsIot/SNTPtime
 
 // Which pin on the ESP8266 is connected to the NeoPixels?
-#define PIN            4
+#define PIN       4
 // How many NeoPixels are attached to the ESP8266?
-#define NUMPIXELS      5
+#define NUMPIXELS 5
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+uint32_t color[10] = {  pixels.Color(0,   0,   0), 
+                        pixels.Color(0,   0, 255),
+                        pixels.Color(0, 255,   0),
+                        pixels.Color(0, 255, 255),
+                        pixels.Color(255, 0,   0),
+                        pixels.Color(255, 0, 255),
+                        pixels.Color(255,255,  0),
+                        pixels.Color(255,255,255),
+                        pixels.Color(128, 0, 128),
+                        pixels.Color(255,165,  0)};
 
 SNTPtime NTPch("es.pool.ntp.org");
-
 strDateTime dateTime;
+byte actualSecond = 0;
 
 //const char *ssid     = "";
 //const char *password = "";
@@ -47,58 +57,27 @@ void setup() {
     pixels.setPixelColor(i, pixels.Color(0,255,0));
   pixels.show();
   delay(1000);
+
+  // first parameter: Time zone; 
+  // second parameter: 1 for European summer time; 2 for US daylight saving time (not implemented yet)
+  dateTime = NTPch.getTime(1.0, 1); // get time from internal clock
+  actualSecond = dateTime.second;
+  
+  do 
+  {
+    dateTime = NTPch.getTime(1.0, 1); 
+    yield(); //to not crash while waiting
+  }
+  while (actualSecond==dateTime.second);
 }
 
 void loop() {
-  // first parameter: Time zone; second parameter: 1 for European summer time; 2 for US daylight saving time (not implemented yet)
-  dateTime = NTPch.getTime(1.0, 1); // get time from internal clock
-  NTPch.printDateTime(dateTime);
-  
-  byte actualsecond = dateTime.second;
-  if(actualsecond>9) actualsecond = actualsecond - (actualsecond/10)*10;
-  
-  switch (actualsecond) {
-    case 0:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(0,0,0));
-      break;
-    case 1:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(0,0,255));
-      break;
-    case 2:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(0,255,0));
-      break;
-    case 3:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(0,255,255));
-      break; 
-    case 4:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,0,0));
-      break;
-    case 5:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,0,255));
-      break;
-    case 6:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,255,0));
-      break;
-    case 7:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,255,255));
-      break;
-    case 8:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(128,0,128));
-      break;
-    case 9:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,165,0));
-      break;              
-  }
+  dateTime = NTPch.getTime(1.0, 1);
+  actualSecond = dateTime.second;
+  if(actualSecond>9) actualSecond = actualSecond - (actualSecond/10)*10;
+
+  for(int i=0;i<NUMPIXELS;i++)
+    pixels.setPixelColor(i, color[actualSecond]);
   pixels.show();
-  delay(50);
+  yield(); //to not crash
 }
