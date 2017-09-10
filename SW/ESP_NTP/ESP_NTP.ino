@@ -15,10 +15,6 @@
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 
-char ssid[] = "Rwlan55";
-char pass[] = "1395513955";
-
-
 
 //char ssid[] = "*************";  //  your network SSID (name)
 //char pass[] = "********";       // your network password
@@ -39,16 +35,13 @@ byte packetBuffer[ NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing pack
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP udp;
 
-
-unsigned long secondsSice1900;
-unsigned long deltaMiliseconds;
-
 struct secodsWithMillis
 {
   unsigned long seconds;
-  int           milliseconds;
+  int           millisec;
 };
 
+secodsWithMillis timeDifference;
 
 void setup()
 {
@@ -83,19 +76,51 @@ void setup()
 void loop()
 {
   int actualSecond;
-  secodsWithMillis millisSince1990;
- 
+  int millisInicio = millis();
+  secodsWithMillis extTime;
+  secodsWithMillis extTime2;
+
+
+
+  extTime = getLocalTime();
+  Serial.print (extTime.seconds);
+  Serial.print (".");
+  Serial.println (extTime.millisec);
   
+  Serial.println ("************************");
+
+  extTime = setLocalTime();
+  Serial.print (extTime.seconds);
+  Serial.print (".");
+  Serial.println (extTime.millisec%1000);
+  
+  Serial.println ();
+
   while (1)
   {
-    millisSince1990 = get_NTP_seconds();
+    extTime = get_NTP_seconds();
+    extTime2 = getLocalTime();
+    Serial.print ("\t\t\t");
+    Serial.print (extTime2.seconds);
+    Serial.print (".");
+    Serial.print (extTime2.millisec);
+
+
+    Serial.print ("\t\t difF: ");
+
+    Serial.print (extTime2.seconds  - extTime.seconds);
+    Serial.print (".");
+    Serial.print (extTime2.millisec - extTime.millisec);
+
+    Serial.print ("\t\t millis: ");
+    Serial.println (millis()- millisInicio);
+    
     delay (800 + random (400));
-    Serial.println ("   ***   ");
   }
 
 
 
-
+/*
   
   actualSecond = (millis()-deltaMiliseconds)/1000;  // calcula los segundos desde la lectura de NTP
   actualSecond = actualSecond + secondsSice1900;    // suma los segundos en aquel momento
@@ -143,12 +168,16 @@ void loop()
         pixels.setPixelColor(i, pixels.Color(255,165,0));
       break;              
   }
+  */
   pixels.show();
   delay(50); 
+  
 }
 
-
-
+/***************************************************************************
+   This function retuns an struct with seconds since 1990, and milliseconds
+   so it can be sincronized with the millis() function
+***************************************************************************/
 secodsWithMillis get_NTP_seconds()
 {
   secodsWithMillis millisSince1990;
@@ -195,28 +224,71 @@ secodsWithMillis get_NTP_seconds()
     // this is NTP time (seconds since Jan 1 1900):
 
 
-    
-    unsigned long secsSince1900 = highWord << 16 | lowWord;
-    int milisSince1900 = packetBuffer[44]*1000/256;
+    millisSince1990.seconds  = highWord << 16 | lowWord;
+    millisSince1990.millisec = packetBuffer[44]*1000/256;
 
-    millisSince1990.seconds = highWord << 16 | lowWord;
-    millisSince1990.milliseconds = packetBuffer[44]*1000/256;
-
+    /*
+    timeDifference.seconds  = millisSince1990.seconds 
+                               - (startQueringTime+endQueringTime)/2000;
+    timeDifference.millisec = millisSince1990.millisec 
+                               - ((startQueringTime+endQueringTime)/2)%1000;
+    */
     
     Serial.print("Seconds since Jan 1 1900 = " );
-    Serial.print(secsSince1900);
+    Serial.print(millisSince1990.seconds);
     Serial.print(".");
-    Serial.print(milisSince1900);
+    Serial.print(millisSince1990.millisec);
     Serial.println();
     
-    
-
-    //unsigned long retardo;
-    //retardo = (255 - packetBuffer[44]) * 3906; // espera al comienzo del próximo segundo
-    //delayMicroseconds (retardo);
-
     return millisSince1990;
   }
+}
+
+/***************************************************************************
+   This function sets the parameters for calculating the actual time from 
+   the milis() function
+***************************************************************************/
+secodsWithMillis setLocalTime()
+{
+  
+  secodsWithMillis extTime;
+  unsigned long milliseconds;
+  
+  extTime = get_NTP_seconds();
+
+  milliseconds = millis();
+  timeDifference.millisec = extTime.millisec - milliseconds%1000;
+  timeDifference.seconds  = extTime.seconds  - milliseconds/1000;
+  if (timeDifference.millisec < 0)
+  {
+    timeDifference.millisec += 1000;
+    timeDifference.seconds  -= 1;
+  }
+  return timeDifference;
+
+}
+
+
+/***************************************************************************
+   This function retuns the time calculated fron the internal 
+   milis() function
+***************************************************************************/
+secodsWithMillis getLocalTime()
+{
+  secodsWithMillis extTime;
+  unsigned long milliseconds;
+
+  milliseconds = millis();
+  extTime.millisec = timeDifference.millisec + (milliseconds%1000);
+  extTime.seconds  = timeDifference.seconds  + milliseconds/1000;
+  if (extTime.millisec > 999)
+  {
+    extTime.millisec -= 1000;
+    extTime.seconds  += 1;
+  }
+
+  return extTime;
+  
 }
 
 // send an NTP request to the time server at the given address
