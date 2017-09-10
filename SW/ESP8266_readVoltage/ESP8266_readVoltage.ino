@@ -73,6 +73,9 @@ void loop() {
   else
     { bars = 1; color = red;}
 
+  for(int i=0;i<NUMPIXELS;i++) //clear all
+    pixels.setPixelColor(i, black);
+  
   for(int i=0;i<bars;i++)
     pixels.setPixelColor(i, color);
   pixels.show();
