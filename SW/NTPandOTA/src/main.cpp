@@ -35,6 +35,10 @@ void setup() {
     Serial.println("Unable to update time.");
   }
 
+  pinMode(LED_BUILTIN, OUTPUT);
+  pixels.begin();
+  pixels.setBrightness(8);
+
   for (int j=0; j<5; j++)
   {
     pixels.setPixelColor(j, pixels.Color(0,0,0));
@@ -47,6 +51,8 @@ void loop() {
   handleOTA();
 
   secodsWithMillis extTime = Clock::getTime();
+
+  digitalWrite(LED_BUILTIN, extTime.seconds % 2);
 
   int colorIndex = extTime.seconds % 8;
   for(int i=0;i<NUMPIXELS;i++)
