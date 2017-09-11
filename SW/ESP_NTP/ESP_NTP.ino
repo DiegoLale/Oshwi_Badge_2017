@@ -122,16 +122,16 @@ void setup()
 
 
 
-  delay (10000);
+  delay (1000);
   extTime.seconds = 0;
   int i = 0;   
   while (extTime.seconds == 0)
   {
     for (int j=0; j<5; j++)
     {
-      pixels.setPixelColor(j, pixels.Color(0,0,0));
+      if (i==j) pixels.setPixelColor(i, pixels.Color(100,25,125));
+      else      pixels.setPixelColor(j, pixels.Color(0,0,0));
     }
-    pixels.setPixelColor(i, pixels.Color(255,255,255));
     pixels.show();
     i++;
     i = i%5;
@@ -141,16 +141,13 @@ void setup()
 
   }
   
-  extTime = setLocalTime();
-  Serial.print (extTime.seconds);
-  Serial.print (".");
-  Serial.println (extTime.millisec%1000);
+  printTime(extTime);
+  Serial.println ();
 
   
+  delay (1000);
   for (int j=0; j<5; j++)
-  {
     pixels.setPixelColor(j, pixels.Color(0,0,0));
-  }
   pixels.show();  
 }
 
@@ -165,7 +162,7 @@ void loop()
   int colorIndex;
   static int colorIndexAnt;
 
-  colorIndex = extTime2.seconds % 8;
+  colorIndex = extTime2.seconds % 10;
   for(int i=0;i<NUMPIXELS;i++)
         pixels.setPixelColor(i, pixels.Color(colores[colorIndex].r,
                                              colores[colorIndex].g,
@@ -175,9 +172,8 @@ void loop()
   {
     Serial.print (int((millis()- millisInicio)/1000));
     Serial.print (" s\t\t");
-    Serial.print (extTime2.seconds  - extTime.seconds);
-    Serial.print (".");
-    Serial.println (extTime2.millisec - extTime.millisec);
+    printTime(extTime2);
+    Serial.println ();
     
     colorIndexAnt = colorIndex;
   }
@@ -186,6 +182,24 @@ void loop()
   delay(50); 
   
 }
+
+/***************************************************************************
+   This function sets the parameters for calculating the actual time from 
+   the milis() function
+***************************************************************************/
+void printTime(secodsWithMillis extTime)
+{
+  String timeText;
+  timeText = String (extTime.millisec);
+  if      (extTime.millisec ==  0) timeText = "000";
+  else if (extTime.millisec <  10) timeText =  "00" + timeText;
+  else if (extTime.millisec < 100) timeText =   "0" + timeText;
+
+  timeText = String (extTime.seconds) + "." + timeText;
+  
+  Serial.print (timeText);
+}
+
 
 /***************************************************************************
    This function retuns an struct with seconds since 1990, and milliseconds
