@@ -41,7 +41,17 @@ struct secodsWithMillis
   int           millisec;
 };
 
+struct color
+{
+  byte r;
+  byte g;
+  byte b;
+  byte w;
+};
+
 secodsWithMillis timeDifference;
+
+color colores[10];
 
 void setup()
 {
@@ -49,17 +59,51 @@ void setup()
   Serial.println();
   Serial.println();
 
+
+
+  colores[0] = {  0,  0,  0};
+  colores[1] = {  0,  0,255};
+  colores[2] = {  0,255,  0};
+  colores[3] = {  0,255,255};
+  colores[4] = {255,  0,  0};
+  colores[5] = {255,  0,255};
+  colores[6] = {255,255,  0};
+  colores[7] = {255,255,255};
+  colores[8] = {128,  0,128};
+  colores[9] = {255,165,  0};
+
+  Serial.print ("colores {");
+  Serial.print (colores[9].r); Serial.print (", ");
+  Serial.print (colores[9].g); Serial.print (", ");
+  Serial.print (colores[9].b); Serial.println ("}");
+
+  pixels.begin();
+
   // We start by connecting to a WiFi network
   Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, pass);
   
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    for (int i=0; i<8; i++)
+    {
+      for (int j=0; j<5; j++)
+      {
+        pixels.setPixelColor(j, pixels.Color(colores[i].r, colores[i].g, colores[i].b));
+        pixels.show();
+        delay (10);
+      }
+    }
     Serial.print(".");
   }
   Serial.println("");
-  
+
+  for (int j=0; j<5; j++)
+  {
+    pixels.setPixelColor(j, pixels.Color(0,0,0));
+  }
+  pixels.show();
+
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
@@ -70,7 +114,40 @@ void setup()
   Serial.println(udp.localPort());
 
   //secondsSice1900 = get_NTP_seconds();
-  //deltaMiliseconds = millis();  
+  //deltaMiliseconds = millis();
+
+  secodsWithMillis extTime;
+
+
+
+
+  delay (10000);
+  extTime.seconds = 0;
+  int i = 0;   
+  while (extTime.seconds == 0)
+  {
+    for (int j=0; j<5; j++)
+    {
+      pixels.setPixelColor(j, pixels.Color(0,0,0));
+    }
+    pixels.setPixelColor(i, pixels.Color(128,0,0));
+    pixels.show();
+    i++;
+
+    extTime = setLocalTime();
+  }
+  
+  extTime = setLocalTime();
+  Serial.print (extTime.seconds);
+  Serial.print (".");
+  Serial.println (extTime.millisec%1000);
+
+  
+  for (int j=0; j<5; j++)
+  {
+    pixels.setPixelColor(j, pixels.Color(0,0,0));
+  }
+  pixels.show();  
 }
 
 void loop()
@@ -81,7 +158,7 @@ void loop()
   secodsWithMillis extTime2;
 
 
-
+  /*
   extTime = getLocalTime();
   Serial.print (extTime.seconds);
   Serial.print (".");
@@ -112,21 +189,33 @@ void loop()
     Serial.print (".");
     Serial.print (extTime2.millisec - extTime.millisec);
 
-    Serial.print ("\t\t millis: ");
-    Serial.println (millis()- millisInicio);
+    Serial.print ("\t\t seconds: ");
+    Serial.println (int((millis()- millisInicio)/1000));
     
     delay (800 + random (400));
   }
+  */
 
 
 
-/*
-  
+  /*
   actualSecond = (millis()-deltaMiliseconds)/1000;  // calcula los segundos desde la lectura de NTP
   actualSecond = actualSecond + secondsSice1900;    // suma los segundos en aquel momento
   actualSecond = actualSecond % 10;                 // divide módulo 10
+  */
 
-   switch (actualSecond) {
+  
+  extTime2 = getLocalTime();
+  int colorIndex;
+  colorIndex = extTime2.seconds % 8;
+  for(int i=0;i<NUMPIXELS;i++)
+        pixels.setPixelColor(i, pixels.Color(colores[colorIndex].r,
+                                             colores[colorIndex].g,
+                                             colores[colorIndex].b));
+
+   /*
+
+   switch (extTime2.seconds%8) {
     case 0:
       for(int i=0;i<NUMPIXELS;i++)
         pixels.setPixelColor(i, pixels.Color(0,0,0));
