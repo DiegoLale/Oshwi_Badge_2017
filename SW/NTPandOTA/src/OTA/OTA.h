@@ -1,0 +1,3 @@
+
+void initOTA();
+void handleOTA();
