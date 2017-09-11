@@ -15,7 +15,6 @@
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 
-
 //char ssid[] = "*************";  //  your network SSID (name)
 //char pass[] = "********";       // your network password
 
@@ -52,6 +51,8 @@ struct color
 secodsWithMillis timeDifference;
 
 color colores[10];
+
+int millisInicio;
 
 void setup()
 {
@@ -130,11 +131,14 @@ void setup()
     {
       pixels.setPixelColor(j, pixels.Color(0,0,0));
     }
-    pixels.setPixelColor(i, pixels.Color(128,0,0));
+    pixels.setPixelColor(i, pixels.Color(255,255,255));
     pixels.show();
     i++;
+    i = i%5;
 
     extTime = setLocalTime();
+    millisInicio = millis();
+
   }
   
   extTime = setLocalTime();
@@ -153,111 +157,31 @@ void setup()
 void loop()
 {
   int actualSecond;
-  int millisInicio = millis();
   secodsWithMillis extTime;
   secodsWithMillis extTime2;
 
 
-  /*
-  extTime = getLocalTime();
-  Serial.print (extTime.seconds);
-  Serial.print (".");
-  Serial.println (extTime.millisec);
-  
-  Serial.println ("************************");
-
-  extTime = setLocalTime();
-  Serial.print (extTime.seconds);
-  Serial.print (".");
-  Serial.println (extTime.millisec%1000);
-  
-  Serial.println ();
-
-  while (1)
-  {
-    extTime = get_NTP_seconds();
-    extTime2 = getLocalTime();
-    Serial.print ("\t\t\t");
-    Serial.print (extTime2.seconds);
-    Serial.print (".");
-    Serial.print (extTime2.millisec);
-
-
-    Serial.print ("\t\t difF: ");
-
-    Serial.print (extTime2.seconds  - extTime.seconds);
-    Serial.print (".");
-    Serial.print (extTime2.millisec - extTime.millisec);
-
-    Serial.print ("\t\t seconds: ");
-    Serial.println (int((millis()- millisInicio)/1000));
-    
-    delay (800 + random (400));
-  }
-  */
-
-
-
-  /*
-  actualSecond = (millis()-deltaMiliseconds)/1000;  // calcula los segundos desde la lectura de NTP
-  actualSecond = actualSecond + secondsSice1900;    // suma los segundos en aquel momento
-  actualSecond = actualSecond % 10;                 // divide módulo 10
-  */
-
-  
   extTime2 = getLocalTime();
   int colorIndex;
+  static int colorIndexAnt;
+
   colorIndex = extTime2.seconds % 8;
   for(int i=0;i<NUMPIXELS;i++)
         pixels.setPixelColor(i, pixels.Color(colores[colorIndex].r,
                                              colores[colorIndex].g,
                                              colores[colorIndex].b));
 
-   /*
-
-   switch (extTime2.seconds%8) {
-    case 0:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(0,0,0));
-      break;
-    case 1:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(0,0,255));
-      break;
-    case 2:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(0,255,0));
-      break;
-    case 3:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(0,255,255));
-      break; 
-    case 4:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,0,0));
-      break;
-    case 5:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,0,255));
-      break;
-    case 6:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,255,0));
-      break;
-    case 7:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,255,255));
-      break;
-    case 8:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(128,0,128));
-      break;
-    case 9:
-      for(int i=0;i<NUMPIXELS;i++)
-        pixels.setPixelColor(i, pixels.Color(255,165,0));
-      break;              
+  if (colorIndex != colorIndexAnt)
+  {
+    Serial.print (int((millis()- millisInicio)/1000));
+    Serial.print (" s\t\t");
+    Serial.print (extTime2.seconds  - extTime.seconds);
+    Serial.print (".");
+    Serial.println (extTime2.millisec - extTime.millisec);
+    
+    colorIndexAnt = colorIndex;
   }
-  */
+
   pixels.show();
   delay(50); 
   
@@ -316,13 +240,7 @@ secodsWithMillis get_NTP_seconds()
     millisSince1990.seconds  = highWord << 16 | lowWord;
     millisSince1990.millisec = packetBuffer[44]*1000/256;
 
-    /*
-    timeDifference.seconds  = millisSince1990.seconds 
-                               - (startQueringTime+endQueringTime)/2000;
-    timeDifference.millisec = millisSince1990.millisec 
-                               - ((startQueringTime+endQueringTime)/2)%1000;
-    */
-    
+     
     Serial.print("Seconds since Jan 1 1900 = " );
     Serial.print(millisSince1990.seconds);
     Serial.print(".");
