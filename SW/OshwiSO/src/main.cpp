@@ -21,18 +21,21 @@
 #include "OTA.h"
 #include "PermanentConnection.h"
 #include "ClockUpdater.h"
+#include "ModeHandler.h"
 
 OS* os = new OS();
 Blink* blink = new Blink();
 PermanentConnection* permanentConnection = new PermanentConnection();
 OTA* ota = new OTA();
 ClockUpdater* clockUpdater = new ClockUpdater();
+ModeHandler* modeHandler = new ModeHandler(os);
 
 void setup() {
     os->addProcess(blink, 1000); // Run blink every 1000 ms
     os->addProcess(permanentConnection);
     os->addProcess(ota); // Run ota as fast as possible
     os->addProcess(clockUpdater, 10 * 60 * 1000); // Run every 10 minutes
+    os->addProcess(modeHandler);
 }
 
 void loop() {
