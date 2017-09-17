@@ -1,7 +1,6 @@
 /*
- main.cpp - This is the entry point of the application.
-
- Copyright (c) 2017 Bricolabs.  All right reserved.
+ Clock.h - Base class for timming
+ Copyright (c) 2016 Oscar Blanco.  All right reserved.
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
@@ -16,25 +15,23 @@
  */
 
 #include <Arduino.h>
-#include "OS/OS.h"
-#include "Blink.h"
-#include "OTA.h"
-#include "PermanentConnection.h"
-#include "ClockUpdater.h"
 
-OS* os = new OS();
-Blink* blink = new Blink();
-PermanentConnection* permanentConnection = new PermanentConnection();
-OTA* ota = new OTA();
-ClockUpdater* clockUpdater = new ClockUpdater();
+const unsigned long NTP_TIMEOUT = 3000; // 3s
 
-void setup() {
-    os->addProcess(blink, 1000); // Run blink every 1000 ms
-    os->addProcess(permanentConnection);
-    os->addProcess(ota); // Run ota as fast as possible
-    os->addProcess(clockUpdater, 10 * 60 * 1000); // Run every 10 minutes
-}
+struct secodsWithMillis
+{
+  unsigned long seconds;
+  unsigned long millisec;
+};
 
-void loop() {
-    os->handle();
-}
+class Clock
+{
+public:
+  static bool updateTime();
+  static secodsWithMillis getTime();
+  static String getHumanDateTime(unsigned long unixTime);
+
+protected:
+  static secodsWithMillis _currentTime;
+  static unsigned long _lastUpdate;
+};
