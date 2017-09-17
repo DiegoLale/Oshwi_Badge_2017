@@ -1,7 +1,8 @@
 /*
- main.cpp - This is the entry point of the application.
+ Blink.h - This class connects to a wifi networks and mantains the Connection
+ forever.
 
- Copyright (c) 2017 Bricolabs.  All right reserved.
+ Copyright (c) 2017 Oscar Blanco.  All right reserved.
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
@@ -15,23 +16,27 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Arduino.h>
-#include "OS/OS.h"
-#include "Blink.h"
-#include "OTA.h"
-#include "PermanentConnection.h"
+#include "OS/Process.h"
+#include "Arduino.h"
+#include <ESP8266WiFi.h>
 
-OS* os = new OS();
-Blink* blink = new Blink();
-PermanentConnection* permanentConnection = new PermanentConnection();
-OTA* ota = new OTA();
+class PermanentConnection : public Process
+{
+  public:
+    void setup()
+    {
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(_ssid, _password);
+      while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+        Serial.println("Connection Failed! Rebooting...");
+        delay(5000);
+        ESP.restart();
+      }
+    }
 
-void setup() {
-    os->addProcess(blink, 1000); // Run blink every 1000 ms
-    os->addProcess(permanentConnection);
-    os->addProcess(ota); // Run ota as fast as possible
-}
+    void loop(){}
 
-void loop() {
-    os->handle();
-}
+  private:
+    const char* _ssid = "***";
+    const char* _password = "***";
+};
