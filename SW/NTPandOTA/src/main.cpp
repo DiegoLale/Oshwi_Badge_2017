@@ -3,15 +3,14 @@
 #include <ESP8266mDNS.h>
 #include "OTA/OTA.h"
 #include "Clock/Clock.h"
-#include <Adafruit_NeoPixel.h>
+#include <NeoPixelBrightnessBus.h>
 #include "colores.h"
 
 const char* ssid = "****";
 const char* password = "****";
 
-#define PIN            4 // Which pin on the ESP8266 is connected to the NeoPixels?
 #define NUMPIXELS      5 // How many NeoPixels are attached to the ESP8266?
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+NeoPixelBrightnessBus<NeoGrbFeature, NeoEsp8266Uart800KbpsMethod> pixels(NUMPIXELS);
 
 void setup() {
   Serial.begin(115200);
@@ -35,16 +34,15 @@ void setup() {
     Serial.println("Unable to update time.");
   }
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  pixels.begin();
-  pixels.setBrightness(8);
+  pixels.Begin();
+  pixels.SetBrightness(8);
 
   for (int j=0; j<5; j++)
   {
-    pixels.setPixelColor(j, pixels.Color(0,0,0));
+    pixels.SetPixelColor(j, RgbColor(0,0,0));
   }
 
-  pixels.show();
+  pixels.Show();
 }
 
 void loop() {
@@ -52,15 +50,13 @@ void loop() {
 
   secodsWithMillis extTime = Clock::getTime();
 
-  digitalWrite(LED_BUILTIN, extTime.seconds % 2);
-
   int colorIndex = extTime.seconds % 8;
   for(int i=0;i<NUMPIXELS;i++)
   {
-        pixels.setPixelColor(i, pixels.Color(colores[colorIndex].r,
-                                             colores[colorIndex].g,
-                                             colores[colorIndex].b));
+        pixels.SetPixelColor(i, RgbColor(colores[colorIndex].r,
+                                         colores[colorIndex].g,
+                                         colores[colorIndex].b));
   }
 
-  pixels.show();
+  pixels.Show();
 }
