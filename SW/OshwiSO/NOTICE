@@ -1,3 +1,4 @@
 List of dependencies
     - 	(LGPL 2.1 License) ArduinoESP.  https://github.com/esp8266/Arduino
     -   (LGPL 3.0 License) Adafruit Neopixel. https://github.com/adafruit/Adafruit_NeoPixel
+    -   (MIT License) WiFiManager. https://github.com/tzapu/WiFiManager

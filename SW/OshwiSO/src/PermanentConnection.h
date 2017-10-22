@@ -19,24 +19,19 @@
 #include "OS/Process.h"
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
+#include <WiFiManager.h>
 
 class PermanentConnection : public Process
 {
   public:
     void setup()
     {
-      WiFi.mode(WIFI_STA);
-      WiFi.begin(_ssid, _password);
-      while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-        Serial.println("Connection Failed! Rebooting...");
-        delay(5000);
-        ESP.restart();
-      }
+      wifiManager.autoConnect("ConfigurationAp_" + ESP.getChipId(), _password);
     }
 
     void loop(){}
 
   private:
-    const char* _ssid = "***";
+    WiFiManager wifiManager;
     const char* _password = "***";
 };
