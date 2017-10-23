@@ -31,6 +31,7 @@ ClockUpdater* clockUpdater = new ClockUpdater();
 ModeHandler* modeHandler = new ModeHandler(os);
 
 void setup() {
+    Serial.begin(9600);
     os->addProcess(blink, 1000); // Run blink every 1000 ms
     os->addProcess(permanentConnection);
     os->addProcess(ota); // Run ota as fast as possible

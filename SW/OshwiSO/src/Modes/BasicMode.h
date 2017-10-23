@@ -25,7 +25,7 @@
 class BasicMode : public Process
 {
   public:
-    BasicMode(Adafruit_NeoPixel pixels)
+    BasicMode(Adafruit_NeoPixel* pixels)
     {
       _pixels = pixels;
     }
@@ -34,10 +34,10 @@ class BasicMode : public Process
     {
       for (int j=0; j<5; j++)
       {
-        _pixels.setPixelColor(j, _pixels.Color(0,0,0));
+        _pixels->setPixelColor(j, _pixels->Color(0,0,0));
       }
 
-      _pixels.show();
+      _pixels->show();
     }
 
     void loop()
@@ -45,16 +45,16 @@ class BasicMode : public Process
       secodsWithMillis extTime = Clock::getTime();
 
       int colorIndex = extTime.seconds % 8;
-      for(int i=0;i<_pixels.numPixels();i++)
+      for(int i=0;i<_pixels->numPixels();i++)
       {
-            _pixels.setPixelColor(i, _pixels.Color(colores[colorIndex].r,
+            _pixels->setPixelColor(i, _pixels->Color(colores[colorIndex].r,
                                                  colores[colorIndex].g,
                                                  colores[colorIndex].b));
       }
 
-      _pixels.show();
+      _pixels->show();
     }
 
   private:
-    Adafruit_NeoPixel _pixels;
+    Adafruit_NeoPixel* _pixels;
 };
