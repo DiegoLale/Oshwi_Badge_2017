@@ -5,7 +5,7 @@
 #include <Adafruit_NeoPixel.h>
 
 // Which pin on the ESP8266 is connected to the NeoPixels?
-#define PIN            4
+#define PIN            2
 // How many NeoPixels are attached to the ESP8266?
 #define NUMPIXELS      5
 
@@ -23,7 +23,7 @@ void loop() {
   for(int i=0;i<NUMPIXELS;i++)
   {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
-    pixels.setPixelColor(i, pixels.Color(1,0,0)); // Moderately bright green color.
+    pixels.setPixelColor(i, pixels.Color(50,0,0)); // Moderately bright green color.
     pixels.show(); // This sends the updated pixel color to the hardware.
     delay(delayval); // Delay for a period of time (in milliseconds).
   }
@@ -31,7 +31,7 @@ void loop() {
   for(int i=0;i<NUMPIXELS;i++)
   {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
-    pixels.setPixelColor(i, pixels.Color(0,1,0)); // Moderately bright green color.
+    pixels.setPixelColor(i, pixels.Color(0,50,0)); // Moderately bright green color.
     pixels.show(); // This sends the updated pixel color to the hardware.
     delay(delayval); // Delay for a period of time (in milliseconds).
   }
@@ -39,7 +39,7 @@ void loop() {
   for(int i=0;i<NUMPIXELS;i++)
   {
     // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
-    pixels.setPixelColor(i, pixels.Color(0,0,1)); // Moderately bright green color.
+    pixels.setPixelColor(i, pixels.Color(0,0,50)); // Moderately bright green color.
     pixels.show(); // This sends the updated pixel color to the hardware.
     delay(delayval); // Delay for a period of time (in milliseconds).
   }
