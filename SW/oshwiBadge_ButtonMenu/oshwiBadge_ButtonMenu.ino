@@ -4,7 +4,7 @@
 //if you press five seconds USR button flashlight mode is activated!
 #include <Adafruit_NeoPixel.h>
 
-#define NEOPIXELPIN 4
+#define NEOPIXELPIN 2
 #define NUMPIXELS   5
 
 #define BUTTONPIN 0
