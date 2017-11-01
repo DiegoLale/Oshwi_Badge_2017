@@ -10,7 +10,7 @@
 #include "ESP8266WiFi.h"
 #include <Adafruit_NeoPixel.h> //you need to install "Adafruit NeoPixel" library
 
-#define PIN            4 //Which pin is connected to the NeoPixels
+#define PIN            2 //Which pin is connected to the NeoPixels
 #define NUMPIXELS      5 //How many NeoPixels we have
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 uint32_t color  = pixels.Color(  0,   0,   0);
