@@ -1,4 +1,4 @@
-//Code by TCRobotics
+//Fast & badly coded by TCRobotics
 //USR button changes between five modes
 //Modes 1 to 4 have a timeout that return to mode 0
 //if you press five seconds USR button flashlight mode is activated!
@@ -22,24 +22,45 @@ const char* password = "pulpinho";
 #define NUMPIXELS   5
 
 #define BUTTONPIN 0
-#define MODE0 0
-#define MODE1 1
-#define MODE2 2
-#define MODE3 3
-#define MODE4 4
-#define MODE5 5
-
+#define MODE0 0 // Default: LED sync
+#define MODE1 1 // KnightRider
+#define MODE2 2 // Rainbow
+#define MODE3 3 // RSSI
+#define MODE4 4 // Voltage test
+#define MODE5 5 // FLASHLIGHT
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, NEOPIXELPIN, NEO_GRB + NEO_KHZ800);
 Ticker ticker; //for timing
 
-uint32_t red    = pixels.Color(255,   0,   0);
+uint32_t color  = pixels.Color(  0,   0,   0);
 uint32_t black  = pixels.Color(  0,   0,   0);
+uint32_t green  = pixels.Color(  0, 255,   0);
+uint32_t yellow = pixels.Color(255, 255,   0);
+uint32_t red    = pixels.Color(255,   0,   0);
 uint32_t white  = pixels.Color(255, 255, 255);
 
 int functionMode = 0;
 long functionStartTime = 0;
-int timeout = 5000;
+int timeout = 10000;
+int firstTime = 1; //to check mode change
+
+ADC_MODE(ADC_VCC); //to read internal voltage
+
+//from Adafruit_NeoPixel library example buttoncycler
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return pixels.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return pixels.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
 
 //for blinking ESP12 led
 void tick()
@@ -66,6 +87,7 @@ void buttonInterrupt(){
     functionMode++;
     if (functionMode>4) functionMode = MODE0;
     functionStartTime = intTime;
+    firstTime = 1;
   }
 }
 
@@ -152,19 +174,144 @@ void loop() {
   switch(functionMode)
   {
     case MODE0:
-      pixels.setPixelColor(0, red);
+      if(firstTime)
+      {
+        pixels.setPixelColor(0, red);
+        pixels.show();
+        delay(500);
+        firstTime = 0;
+      }
+      else
+      {
+
+      }
       break;
     case MODE1:
-      pixels.setPixelColor(1, red);
+      if(firstTime)
+      {
+        pixels.setPixelColor(1, red);
+        pixels.show();
+        delay(500);
+        firstTime = 0;
+      }
+      else
+      {
+        pixels.setPixelColor(0, red);
+        pixels.setPixelColor(1, black);
+        pixels.show();
+        delay(100);
+        pixels.setPixelColor(1, red);
+        pixels.setPixelColor(0, black);
+        pixels.show();
+        delay(100);
+        pixels.setPixelColor(2, red);
+        pixels.setPixelColor(1, black);
+        pixels.show();
+        delay(100);
+        pixels.setPixelColor(3, red);
+        pixels.setPixelColor(2, black);
+        pixels.show();
+        delay(100);
+        pixels.setPixelColor(4, red);
+        pixels.setPixelColor(3, black);
+        pixels.show();
+        delay(100);
+        pixels.setPixelColor(3, red);
+        pixels.setPixelColor(4, black);
+        pixels.show();
+        delay(100);
+        pixels.setPixelColor(2, red);
+        pixels.setPixelColor(3, black);
+        pixels.show();
+        delay(100);
+        pixels.setPixelColor(1, red);
+        pixels.setPixelColor(2, black);
+        pixels.show();
+        delay(100);
+      }
       break;
     case MODE2:
-      pixels.setPixelColor(2, red);
+      if(firstTime)
+      {
+        pixels.setPixelColor(2, red);
+        pixels.show();
+        delay(500);
+        firstTime = 0;
+      }
+      else
+      {
+        //from Adafruit_NeoPixel library example buttoncycler
+        uint16_t i, j;
+
+        for(j=0; j<256; j++) {
+          for(i=0; i< pixels.numPixels(); i++) {
+            pixels.setPixelColor(i, Wheel(((i * 256 / pixels.numPixels()) + j) & 255));
+          }
+          pixels.show();
+          delay(2);
+        }
+      }
       break;
     case MODE3:
-      pixels.setPixelColor(3, red);
+      if(firstTime)
+      {
+        pixels.setPixelColor(3, red);
+        pixels.show();
+        delay(500);
+        firstTime = 0;
+      }
+      else
+      {
+        float rssi = WiFi.RSSI();
+        int bars = 0;
+
+        if (rssi > -55)
+          { bars = 5; color = green;}
+        else if (rssi > -65 & rssi < -55)
+          { bars = 4; color = green;}
+        else if (rssi > -70 & rssi < -65)
+          { bars = 3; color = yellow;}
+        else if (rssi > -80 & rssi < -70)
+          { bars = 2; color = yellow;}
+        else
+          { bars = 1; color = red;}
+
+        for(int i=0;i<bars;i++)
+          pixels.setPixelColor(i, color);
+        Serial.println(rssi);
+        pixels.show();
+        delay(1000);
+      }
       break;
     case MODE4:
-      pixels.setPixelColor(4, red);
+      if(firstTime)
+      {
+        pixels.setPixelColor(4, red);
+        pixels.show();
+        delay(500);
+        firstTime = 0;
+      }
+      else
+      {
+        float voltage = ESP.getVcc()/1000.0;
+        int bars = 0;
+
+        if (voltage > 3.2)
+          { bars = 5; color = green;}
+        else if (voltage > 3.1 & voltage < 3.2)
+          { bars = 4; color = green;}
+        else if (voltage > 3.0 & voltage < 3.1)
+          { bars = 3; color = yellow;}
+        else if (voltage > 2.9 & voltage < 3.0)
+          { bars = 2; color = yellow;}
+        else
+          { bars = 1; color = red;}
+
+        for(int i=0;i<bars;i++)
+          pixels.setPixelColor(i, color);
+        Serial.println(voltage);
+        pixels.show();
+      }
       break;
     case MODE5: //FLASHLIGT MODE
       pixels.setBrightness(255);
