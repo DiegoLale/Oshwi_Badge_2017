@@ -14,6 +14,7 @@
 //needed for OTA
 #include "ArduinoOTA.h"
 #include <ESP8266mDNS.h>
+#include "Clock/Clock.h"
 
 const char* ssid = "OshwiBadge_XX"; //XX put here your badge number
 const char* password = "pulpinho";
@@ -32,12 +33,34 @@ const char* password = "pulpinho";
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, NEOPIXELPIN, NEO_GRB + NEO_KHZ800);
 Ticker ticker; //for timing
 
-uint32_t color  = pixels.Color(  0,   0,   0);
+uint32_t colorVar= pixels.Color(  0,   0,   0);
 uint32_t black  = pixels.Color(  0,   0,   0);
 uint32_t green  = pixels.Color(  0, 255,   0);
 uint32_t yellow = pixels.Color(255, 255,   0);
 uint32_t red    = pixels.Color(255,   0,   0);
 uint32_t white  = pixels.Color(255, 255, 255);
+
+struct color
+{
+  byte r;
+  byte g;
+  byte b;
+  byte w;
+};
+
+color colores[10] = {
+  {  0,  0,  0},
+  {  0,  0,255},
+  {  0,255,  0},
+  {  0,255,255},
+  {255,  0,  0},
+  {255,  0,255},
+  {255,255,  0},
+  {255,255,255},
+  {128,  0,128},
+  {255,165,  0}
+};
+
 
 int functionMode = 0;
 long functionStartTime = 0;
@@ -67,6 +90,11 @@ void tick()
 {
   int state = digitalRead(BUILTIN_LED);  // get the current state
   digitalWrite(BUILTIN_LED, !state);     // set pin to the opposite state
+}
+
+void updateTime()
+{
+  Clock::updateTime();
 }
 
 //gets called when WiFiManager enters configuration mode
@@ -152,7 +180,11 @@ void setup() {
   ticker.detach();
   //keep LED off
   digitalWrite(BUILTIN_LED, HIGH);
-  //pinMode(BUILTIN_LED, INPUT_PULLUP);
+  while (!Clock::updateTime())
+  {
+    Serial.println("Unable to update time.");
+  }
+  ticker.attach(600, updateTime);
   //MENU/////////////////////////////////////////////////////////////////////////////////////
   pinMode(BUTTONPIN,INPUT);
   attachInterrupt(BUTTONPIN, buttonInterrupt, FALLING);
@@ -183,7 +215,16 @@ void loop() {
       }
       else
       {
+        secodsWithMillis extTime = Clock::getTime();
+        int colorIndex = extTime.seconds % 8;
+        for(int i=0;i<NUMPIXELS;i++)
+        {
+              pixels.setPixelColor(i, pixels.Color(colores[colorIndex].r,
+                                                   colores[colorIndex].g,
+                                                   colores[colorIndex].b));
+        }
 
+        pixels.show();
       }
       break;
     case MODE1:
@@ -266,18 +307,18 @@ void loop() {
         int bars = 0;
 
         if (rssi > -55)
-          { bars = 5; color = green;}
+          { bars = 5; colorVar = green;}
         else if (rssi > -65 & rssi < -55)
-          { bars = 4; color = green;}
+          { bars = 4; colorVar = green;}
         else if (rssi > -70 & rssi < -65)
-          { bars = 3; color = yellow;}
+          { bars = 3; colorVar = yellow;}
         else if (rssi > -80 & rssi < -70)
-          { bars = 2; color = yellow;}
+          { bars = 2; colorVar = yellow;}
         else
-          { bars = 1; color = red;}
+          { bars = 1; colorVar = red;}
 
         for(int i=0;i<bars;i++)
-          pixels.setPixelColor(i, color);
+          pixels.setPixelColor(i, colorVar);
         Serial.println(rssi);
         pixels.show();
         delay(1000);
@@ -297,18 +338,18 @@ void loop() {
         int bars = 0;
 
         if (voltage > 3.2)
-          { bars = 5; color = green;}
+          { bars = 5; colorVar = green;}
         else if (voltage > 3.1 & voltage < 3.2)
-          { bars = 4; color = green;}
+          { bars = 4; colorVar = green;}
         else if (voltage > 3.0 & voltage < 3.1)
-          { bars = 3; color = yellow;}
+          { bars = 3; colorVar = yellow;}
         else if (voltage > 2.9 & voltage < 3.0)
-          { bars = 2; color = yellow;}
+          { bars = 2; colorVar = yellow;}
         else
-          { bars = 1; color = red;}
+          { bars = 1; colorVar = red;}
 
         for(int i=0;i<bars;i++)
-          pixels.setPixelColor(i, color);
+          pixels.setPixelColor(i, colorVar);
         Serial.println(voltage);
         pixels.show();
       }
