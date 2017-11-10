@@ -21,7 +21,7 @@
 
 class Process {
    public:
-      virtual void setup() = 0;
+      virtual void setup();
       virtual void loop() = 0;
 
       void run();
@@ -30,8 +30,8 @@ class Process {
       void setInterval(unsigned int);
 
    protected:
-      unsigned long _lastRun;
-      unsigned int _interval;
+      unsigned long _lastRun =0;
+      unsigned int _interval=0;
 };
 
 #endif

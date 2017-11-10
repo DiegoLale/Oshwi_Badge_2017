@@ -33,6 +33,7 @@ class VoltageTest : public Process
 
     void setup()
     {
+      Process::setup();
       for (int j=0; j<5; j++)
       {
         _pixels->setPixelColor(j, _pixels->Color(0,0,0));
@@ -67,7 +68,7 @@ class VoltageTest : public Process
 
   private:
     Adafruit_NeoPixel* _pixels;
-    
+
     uint32_t colorVar= _pixels->Color(  0,   0,   0);
     uint32_t black  = _pixels->Color(  0,   0,   0);
     uint32_t green  = _pixels->Color(  0, 255,   0);

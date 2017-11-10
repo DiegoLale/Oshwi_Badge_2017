@@ -24,6 +24,11 @@ unsigned long Process::getLastRun()
   return _lastRun;
 }
 
+ void Process::setup()
+{
+  _lastRun=0;
+}
+
 unsigned int Process::getInterval()
 {
   return _interval;

@@ -21,7 +21,7 @@
 
 void OS::addProcess(Process* p, unsigned int interval)
 {
-  Serial.println(String("add ") + interval);
+  //Serial.println(String("add ") + interval);
   processes.push_back(p);
   p->setInterval(interval);
   p->setup();
@@ -34,7 +34,7 @@ void OS::killProcess(Process* p)
   {
     if (*it == p)
     {
-      Serial.println("erase");
+      //Serial.println("erase");
       processes.erase(it);
       break;
     }
@@ -46,9 +46,10 @@ void OS::handle()
 {
   for (std::vector<Process*>::iterator it = processes.begin(); it != processes.end(); ++it)
   {
+    //Serial.println(String("test ") + (*it)->getInterval());
     unsigned long currMillis = millis();
     if ((*it)->getLastRun() + (*it)->getInterval() < currMillis)
       (*it)->run();
   }
-
+//  Serial.println();
 }

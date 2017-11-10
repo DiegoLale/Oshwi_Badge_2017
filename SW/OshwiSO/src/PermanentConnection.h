@@ -26,11 +26,12 @@ class PermanentConnection : public Process
   public:
     void setup()
     {
-      wifiManager.resetSettings();
+
       pinMode(PIN, INPUT_PULLUP);
       String apName = String("Oshwi_") + String(ESP.getChipId());
+      delay(1000);
       if (digitalRead(PIN))
-        wifiManager.autoConnect(apName.c_str(), _password);
+        wifiManager.autoConnect("Oshwdem");
       else
         if (!wifiManager.startConfigPortal(apName.c_str(), _password)) {
           Serial.println("failed to connect and hit timeout");
@@ -44,7 +45,7 @@ class PermanentConnection : public Process
     void loop(){}
 
   private:
-    const int PIN = 5;
+    const int PIN = 0;
     WiFiManager wifiManager;
     const char* _password = "12345678";
 };

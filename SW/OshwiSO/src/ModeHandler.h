@@ -43,7 +43,14 @@ class ModeHandler : public Process
       _pixels = new Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
       _pixels->begin();
       _pixels->setBrightness(8);
-      setMode(new BasicMode(_pixels));
+
+      basicMode = new BasicMode(_pixels);
+      knightRider = new KnightRider(_pixels);
+      rainbow = new Rainbow(_pixels);
+      rssi=new Rssi(_pixels);
+      flashlight = new Flashlight(_pixels);
+      voltageTest = new VoltageTest(_pixels);
+      setMode(basicMode);
     }
 
     void loop()
@@ -61,27 +68,27 @@ class ModeHandler : public Process
       switch(mode++){
         case 0:
           Serial.println("setMode: BasicMode");
-          setMode(new BasicMode(_pixels));
+          setMode(basicMode);
           break;
         case 1:
           Serial.println("setMode: KnightRider");
-          setMode(new KnightRider(_pixels), 100);
+          setMode(knightRider, 100);
           break;
         case 2:
           Serial.println("setMode: Rainbow");
-          setMode(new Rainbow(_pixels), 2);
+          setMode(rainbow, 2);
           break;
         case 3:
           Serial.println("setMode: Rssi");
-          setMode(new Rssi(_pixels), 1000);
+          setMode(rssi, 1000);
           break;
         case 4:
           Serial.println("setMode: VoltageTest");
-          setMode(new VoltageTest(_pixels), 1000);
+          setMode(voltageTest, 1000);
           break;
         case 5:
           Serial.println("setMode: Flashlight");
-          setMode(new Flashlight(_pixels));
+          setMode(flashlight, 20000);
           break;
       }
 
@@ -89,10 +96,12 @@ class ModeHandler : public Process
     }
 
   private:
+    Process *basicMode, *knightRider, *rainbow, *rssi, *flashlight, *voltageTest;
+
     uint8_t mode = 1; // start with 1 because we are already in mode 0
     OS* _os;
     Process* _currentMode;
-    const uint8_t PIN = 4; // Which pin on the ESP8266 is connected to the NeoPixels?
+    const uint8_t PIN = 2; // Which pin on the ESP8266 is connected to the NeoPixels?
     const uint8_t NUMPIXELS = 5; // How many NeoPixels are attached to the ESP8266?
     Adafruit_NeoPixel* _pixels;
     unsigned long lastModeChange = 0;
@@ -102,7 +111,7 @@ class ModeHandler : public Process
       if (_currentMode)
       {
         _os->killProcess(_currentMode);
-        delete _currentMode;
+        //delete _currentMode;
       }
 
       _os->addProcess(newMode, interval);

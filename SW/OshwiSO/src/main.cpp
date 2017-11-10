@@ -39,16 +39,18 @@ void modeHandlerInterupt() {
 void setup() {
 
     Serial.begin(9600);
+    //Serial.println("hola");
     //os->addProcess(blink, 1000); // Run blink every 1000 ms
     os->addProcess(permanentConnection);
-    //os->addProcess(ota); // Run ota as fast as possible
-    //os->addProcess(clockUpdater, 10 * 60 * 1000); // Run every 10 minutes
-    //os->addProcess(modeHandler);
+    os->addProcess(ota); // Run ota as fast as possible
+    os->addProcess(clockUpdater, 10 * 60 * 1000); // Run every 10 minutes
+    os->addProcess(modeHandler);
 
-  //  pinMode(BUTTONPIN,INPUT);
-    //attachInterrupt(BUTTONPIN, modeHandlerInterupt, FALLING);
+    pinMode(BUTTONPIN,INPUT);
+    attachInterrupt(BUTTONPIN, modeHandlerInterupt, FALLING);
 }
 
 void loop() {
     os->handle();
+    //Serial.println("test");
 }

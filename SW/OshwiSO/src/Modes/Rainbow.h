@@ -33,6 +33,7 @@ class Rainbow : public Process
 
     void setup()
     {
+      Process::setup();
       for (int j=0; j<5; j++)
       {
         _pixels->setPixelColor(j, _pixels->Color(0,0,0));
@@ -43,9 +44,9 @@ class Rainbow : public Process
       delay(500);
     }
 
+    uint16_t i, j;
     void loop()
     {
-      uint16_t i, j;
 
       for(j=0; j<256; j++) {
         for(i=0; i< _pixels->numPixels(); i++) {

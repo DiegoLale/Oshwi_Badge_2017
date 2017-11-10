@@ -33,6 +33,7 @@ class KnightRider : public Process
 
     void setup()
     {
+      Process::setup();
       for (int j=0; j<5; j++)
       {
         _pixels->setPixelColor(j, _pixels->Color(0,0,0));
@@ -41,6 +42,7 @@ class KnightRider : public Process
       _pixels->setPixelColor(1, _pixels->Color(255,0,0));
       _pixels->show();
       delay(500);
+
     }
 
     void loop()

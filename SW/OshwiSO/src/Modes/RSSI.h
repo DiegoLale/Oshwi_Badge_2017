@@ -33,6 +33,7 @@ class Rssi : public Process
 
     void setup()
     {
+      Process::setup();
       for (int j=0; j<5; j++)
       {
         _pixels->setPixelColor(j, _pixels->Color(0,0,0));
