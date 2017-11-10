@@ -19,63 +19,38 @@
 
 #include "OS/Process.h"
 #include "Arduino.h"
-#include "OS/OS.h"
-#include "Modes/BasicMode.h"
-#include "Modes/KnightRider.h"
-#include "Modes/Rainbow.h"
-#include "Modes/VoltageTest.h"
-#include "Modes/RSSI.h"
-#include "Modes/Flashlight.h"
 #include <Adafruit_NeoPixel.h>
+#include "Colores.h"
 
-class ModeHandler : public Process
+class Flashlight : public Process
 {
   public:
-    // Constructor
-    ModeHandler(OS* os)
+    Flashlight(Adafruit_NeoPixel* pixels)
     {
-      _os = os;
+      _pixels = pixels;
     }
 
     void setup()
     {
-      pinMode(PIN, OUTPUT);
-      _pixels = new Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
-      _pixels->begin();
-      _pixels->setBrightness(8);
-      setMode(new BasicMode(_pixels));
+      for (int j=0; j<5; j++)
+      {
+        _pixels->setPixelColor(j, _pixels->Color(0,0,0));
+      }
+
+      _pixels->setBrightness(255);
+      _pixels->setPixelColor(0, white);
+      _pixels->setPixelColor(1, white);
+      _pixels->setPixelColor(2, white);
+      _pixels->setPixelColor(3, white);
+      _pixels->setPixelColor(4, white);
+      _pixels->show();
     }
 
     void loop()
     {
-
-    }
-
-    void buttonInterrupt(){
-      if (millis() - lastModeChange < 200)
-        return;
-
-      lastModeChange = millis();
-      setMode(new BasicMode(_pixels));
     }
 
   private:
-    OS* _os;
-    Process* _currentMode;
-    const uint8_t PIN = 2; // Which pin on the ESP8266 is connected to the NeoPixels?
-    const uint8_t NUMPIXELS = 5; // How many NeoPixels are attached to the ESP8266?
     Adafruit_NeoPixel* _pixels;
-    unsigned long lastModeChange = 0;
-
-    void setMode(Process* newMode, unsigned int interval=0)
-    {
-      if (_currentMode)
-      {
-        _os->killProcess(_currentMode);
-        delete _currentMode;
-      }
-
-      _os->addProcess(newMode, interval);
-      _currentMode = newMode;
-    }
+    const uint32_t white  = _pixels->Color(255, 255, 255);
 };

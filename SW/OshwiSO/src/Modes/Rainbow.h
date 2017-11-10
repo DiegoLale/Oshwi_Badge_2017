@@ -19,63 +19,55 @@
 
 #include "OS/Process.h"
 #include "Arduino.h"
-#include "OS/OS.h"
-#include "Modes/BasicMode.h"
-#include "Modes/KnightRider.h"
-#include "Modes/Rainbow.h"
-#include "Modes/VoltageTest.h"
-#include "Modes/RSSI.h"
-#include "Modes/Flashlight.h"
 #include <Adafruit_NeoPixel.h>
+#include "Colores.h"
 
-class ModeHandler : public Process
+// delay 2
+class Rainbow : public Process
 {
   public:
-    // Constructor
-    ModeHandler(OS* os)
+    Rainbow(Adafruit_NeoPixel* pixels)
     {
-      _os = os;
+      _pixels = pixels;
     }
 
     void setup()
     {
-      pinMode(PIN, OUTPUT);
-      _pixels = new Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
-      _pixels->begin();
-      _pixels->setBrightness(8);
-      setMode(new BasicMode(_pixels));
+      for (int j=0; j<5; j++)
+      {
+        _pixels->setPixelColor(j, _pixels->Color(0,0,0));
+      }
+
+      _pixels->setPixelColor(2, _pixels->Color(255,0,0));
+      _pixels->show();
+      delay(500);
     }
 
     void loop()
     {
+      uint16_t i, j;
 
-    }
-
-    void buttonInterrupt(){
-      if (millis() - lastModeChange < 200)
-        return;
-
-      lastModeChange = millis();
-      setMode(new BasicMode(_pixels));
+      for(j=0; j<256; j++) {
+        for(i=0; i< _pixels->numPixels(); i++) {
+          _pixels->setPixelColor(i, Wheel(((i * 256 / _pixels->numPixels()) + j) & 255));
+        }
+        _pixels->show();
+      }
     }
 
   private:
-    OS* _os;
-    Process* _currentMode;
-    const uint8_t PIN = 2; // Which pin on the ESP8266 is connected to the NeoPixels?
-    const uint8_t NUMPIXELS = 5; // How many NeoPixels are attached to the ESP8266?
     Adafruit_NeoPixel* _pixels;
-    unsigned long lastModeChange = 0;
 
-    void setMode(Process* newMode, unsigned int interval=0)
-    {
-      if (_currentMode)
-      {
-        _os->killProcess(_currentMode);
-        delete _currentMode;
+    uint32_t Wheel(byte WheelPos) {
+      WheelPos = 255 - WheelPos;
+      if(WheelPos < 85) {
+        return _pixels->Color(255 - WheelPos * 3, 0, WheelPos * 3);
       }
-
-      _os->addProcess(newMode, interval);
-      _currentMode = newMode;
+      if(WheelPos < 170) {
+        WheelPos -= 85;
+        return _pixels->Color(0, WheelPos * 3, 255 - WheelPos * 3);
+      }
+      WheelPos -= 170;
+      return _pixels->Color(WheelPos * 3, 255 - WheelPos * 3, 0);
     }
 };

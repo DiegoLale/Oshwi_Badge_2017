@@ -1,3 +1,6 @@
+#ifndef COLOR_H
+#define COLOR_H
+
 #include "Arduino.h"
 
 struct color
@@ -21,9 +24,4 @@ color colores[10] = {
   {255,165,  0}
 };
 
-uint32_t colorVar= pixels.Color(  0,   0,   0);
-uint32_t black  = pixels.Color(  0,   0,   0);
-uint32_t green  = pixels.Color(  0, 255,   0);
-uint32_t yellow = pixels.Color(255, 255,   0);
-uint32_t red    = pixels.Color(255,   0,   0);
-uint32_t white  = pixels.Color(255, 255, 255);
+#endif

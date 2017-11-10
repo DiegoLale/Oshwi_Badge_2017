@@ -22,10 +22,11 @@
 #include <Adafruit_NeoPixel.h>
 #include "Colores.h"
 
-class BasicMode : public Process
+// delay 1000
+class VoltageTest : public Process
 {
   public:
-    BasicMode(Adafruit_NeoPixel* pixels)
+    VoltageTest(Adafruit_NeoPixel* pixels)
     {
       _pixels = pixels;
     }
@@ -37,26 +38,40 @@ class BasicMode : public Process
         _pixels->setPixelColor(j, _pixels->Color(0,0,0));
       }
 
-      _pixels->setPixelColor(0, _pixels->Color(255,0,0));
+      _pixels->setPixelColor(4, _pixels->Color(255,0,0));
       _pixels->show();
       delay(500);
     }
 
     void loop()
     {
-      secodsWithMillis extTime = Clock::getTime();
+      float voltage = ESP.getVcc()/1000.0;
+      int bars = 0;
 
-      int colorIndex = extTime.seconds % 8;
-      for(int i=0;i<_pixels->numPixels();i++)
-      {
-            _pixels->setPixelColor(i, _pixels->Color(colores[colorIndex].r,
-                                                 colores[colorIndex].g,
-                                                 colores[colorIndex].b));
-      }
+      if (voltage > 3.2)
+        { bars = 5; colorVar = green;}
+      else if (voltage > 3.1 & voltage < 3.2)
+        { bars = 4; colorVar = green;}
+      else if (voltage > 3.0 & voltage < 3.1)
+        { bars = 3; colorVar = yellow;}
+      else if (voltage > 2.9 & voltage < 3.0)
+        { bars = 2; colorVar = yellow;}
+      else
+        { bars = 1; colorVar = red;}
 
+      for(int i=0;i<bars;i++)
+        _pixels->setPixelColor(i, colorVar);
+      Serial.println(voltage);
       _pixels->show();
     }
 
   private:
     Adafruit_NeoPixel* _pixels;
+    
+    uint32_t colorVar= _pixels->Color(  0,   0,   0);
+    uint32_t black  = _pixels->Color(  0,   0,   0);
+    uint32_t green  = _pixels->Color(  0, 255,   0);
+    uint32_t yellow = _pixels->Color(255, 255,   0);
+    uint32_t red    = _pixels->Color(255,   0,   0);
+    uint32_t white  = _pixels->Color(255, 255, 255);
 };

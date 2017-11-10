@@ -23,6 +23,8 @@
 #include "ClockUpdater.h"
 #include "ModeHandler.h"
 
+const uint8_t BUTTONPIN = 0;
+
 OS* os = new OS();
 Blink* blink = new Blink();
 PermanentConnection* permanentConnection = new PermanentConnection();
@@ -30,13 +32,21 @@ OTA* ota = new OTA();
 ClockUpdater* clockUpdater = new ClockUpdater();
 ModeHandler* modeHandler = new ModeHandler(os);
 
+void modeHandlerInterupt() {
+    modeHandler->buttonInterrupt();
+}
+
 void setup() {
+
     Serial.begin(9600);
     os->addProcess(blink, 1000); // Run blink every 1000 ms
     os->addProcess(permanentConnection);
     os->addProcess(ota); // Run ota as fast as possible
     os->addProcess(clockUpdater, 10 * 60 * 1000); // Run every 10 minutes
     os->addProcess(modeHandler);
+
+    pinMode(BUTTONPIN,INPUT);
+    attachInterrupt(BUTTONPIN, modeHandlerInterupt, FALLING);
 }
 
 void loop() {
