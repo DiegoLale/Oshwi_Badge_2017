@@ -39,24 +39,23 @@ class ModeHandler : public Process
       _pixels->begin();
       _pixels->setBrightness(8);
       setMode(new BasicMode(_pixels));
+      pinMode(BUTTONPIN,INPUT);
+      attachInterrupt(BUTTONPIN, buttonInterrupt, FALLING);
     }
 
     void loop()
     {
-      /*
-      if (1 == 0)
-      {
-        setMode(new DiscoMode(_pixels))
-      }
-      */
     }
 
   private:
     OS* _os;
     Process* _currentMode;
-    const int PIN = 4; // Which pin on the ESP8266 is connected to the NeoPixels?
-    const int NUMPIXELS = 5; // How many NeoPixels are attached to the ESP8266?
+    const uint8_t PIN = 2; // Which pin on the ESP8266 is connected to the NeoPixels?
+    const uint8_t NUMPIXELS = 5; // How many NeoPixels are attached to the ESP8266?
     Adafruit_NeoPixel* _pixels;
+    unsigned long lastModeChange = 0;
+
+    const uint8_t BUTTONPIN = 0;
 
     void setMode(Process* newMode)
     {
@@ -68,5 +67,13 @@ class ModeHandler : public Process
 
       _os->addProcess(newMode);
       _currentMode = newMode;
+    }
+
+    void buttonInterrupt(){
+      if (millis() - lastModeChange < 200)
+        return;
+
+      lastModeChange = millis();
+      setMode(new BasicMode(_pixels));
     }
 };
