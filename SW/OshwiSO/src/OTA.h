@@ -60,5 +60,5 @@ class OTA : public Process
     }
 
   private:
-    const char* _password = "***";
+    const char* _password = "12345678";
 };

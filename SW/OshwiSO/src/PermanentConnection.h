@@ -26,6 +26,7 @@ class PermanentConnection : public Process
   public:
     void setup()
     {
+      wifiManager.resetSettings();
       pinMode(PIN, INPUT_PULLUP);
       String apName = String("Oshwi_") + String(ESP.getChipId());
       if (digitalRead(PIN))
@@ -45,5 +46,5 @@ class PermanentConnection : public Process
   private:
     const int PIN = 5;
     WiFiManager wifiManager;
-    const char* _password = "***";
+    const char* _password = "12345678";
 };

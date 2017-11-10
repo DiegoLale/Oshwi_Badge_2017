@@ -21,6 +21,7 @@
 
 void OS::addProcess(Process* p, unsigned int interval)
 {
+  Serial.println(String("add ") + interval);
   processes.push_back(p);
   p->setInterval(interval);
   p->setup();
@@ -29,14 +30,15 @@ void OS::addProcess(Process* p, unsigned int interval)
 void OS::killProcess(Process* p)
 {
   std::vector<Process*>::iterator it = processes.begin();
-
   while (it != processes.end())
   {
     if (*it == p)
     {
+      Serial.println("erase");
       processes.erase(it);
       break;
     }
+    ++it;
   }
 }
 

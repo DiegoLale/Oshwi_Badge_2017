@@ -31,6 +31,10 @@ class Blink : public Process
     void loop()
     {
       status = !status;
+      if (status)
+        Serial.println("me enciendo");
+      else
+        Serial.println("me apago");
       digitalWrite(LED_BUILTIN, status);
     }
 

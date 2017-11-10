@@ -56,13 +56,43 @@ class ModeHandler : public Process
         return;
 
       lastModeChange = millis();
-      setMode(new BasicMode(_pixels));
+      Process* newMode;
+
+      switch(mode++){
+        case 0:
+          Serial.println("setMode: BasicMode");
+          setMode(new BasicMode(_pixels));
+          break;
+        case 1:
+          Serial.println("setMode: KnightRider");
+          setMode(new KnightRider(_pixels), 100);
+          break;
+        case 2:
+          Serial.println("setMode: Rainbow");
+          setMode(new Rainbow(_pixels), 2);
+          break;
+        case 3:
+          Serial.println("setMode: Rssi");
+          setMode(new Rssi(_pixels), 1000);
+          break;
+        case 4:
+          Serial.println("setMode: VoltageTest");
+          setMode(new VoltageTest(_pixels), 1000);
+          break;
+        case 5:
+          Serial.println("setMode: Flashlight");
+          setMode(new Flashlight(_pixels));
+          break;
+      }
+
+      if (mode > 5) mode = 0;
     }
 
   private:
+    uint8_t mode = 1; // start with 1 because we are already in mode 0
     OS* _os;
     Process* _currentMode;
-    const uint8_t PIN = 2; // Which pin on the ESP8266 is connected to the NeoPixels?
+    const uint8_t PIN = 4; // Which pin on the ESP8266 is connected to the NeoPixels?
     const uint8_t NUMPIXELS = 5; // How many NeoPixels are attached to the ESP8266?
     Adafruit_NeoPixel* _pixels;
     unsigned long lastModeChange = 0;
