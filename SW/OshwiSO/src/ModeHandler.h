@@ -32,22 +32,19 @@ class ModeHandler : public Process
 {
   public:
     // Constructor
-    ModeHandler(OS* os)
+    ModeHandler(OS* os, Adafruit_NeoPixel *pixels)
     {
+      _pixels = pixels;
       _os = os;
     }
 
     void setup()
     {
-      pinMode(PIN, OUTPUT);
-      _pixels = new Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
-      _pixels->begin();
-      _pixels->setBrightness(8);
 
       basicMode = new BasicMode(_pixels);
       knightRider = new KnightRider(_pixels);
       rainbow = new Rainbow(_pixels);
-      rssi=new Rssi(_pixels);
+      rssi = new Rssi(_pixels);
       flashlight = new Flashlight(_pixels);
       voltageTest = new VoltageTest(_pixels);
       setMode(basicMode);
@@ -101,8 +98,6 @@ class ModeHandler : public Process
     uint8_t mode = 1; // start with 1 because we are already in mode 0
     OS* _os;
     Process* _currentMode;
-    const uint8_t PIN = 2; // Which pin on the ESP8266 is connected to the NeoPixels?
-    const uint8_t NUMPIXELS = 5; // How many NeoPixels are attached to the ESP8266?
     Adafruit_NeoPixel* _pixels;
     unsigned long lastModeChange = 0;
 

@@ -22,35 +22,64 @@
 #include "PermanentConnection.h"
 #include "ClockUpdater.h"
 #include "ModeHandler.h"
+#include <Adafruit_NeoPixel.h>
 
 const uint8_t BUTTONPIN = 0;
+const uint8_t LEDPIN = 2; // Which pin on the ESP8266 is connected to the NeoPixels?
+const uint8_t NUMPIXELS = 5; // How many NeoPixels are attached to the ESP8266?
+Adafruit_NeoPixel* pixels = new Adafruit_NeoPixel(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KHZ800);
 
 OS* os = new OS();
-Blink* blink = new Blink();
-PermanentConnection* permanentConnection = new PermanentConnection();
+//Blink* blink = new Blink();
+PermanentConnection* permanentConnection;
 OTA* ota = new OTA();
 ClockUpdater* clockUpdater = new ClockUpdater();
-ModeHandler* modeHandler = new ModeHandler(os);
+ModeHandler* modeHandler;
+
+uint32_t orangeColor = pixels->Color(255, 127, 80);
 
 void modeHandlerInterupt() {
     modeHandler->buttonInterrupt();
 }
 
+// this should not be here
+void configModeCallback (WiFiManager *myWiFiManager) {
+  uint32_t redColor = pixels->Color(255, 0, 0);
+  for(int i=0; i<NUMPIXELS; i++) {
+    pixels->setPixelColor(i, redColor);
+  }
+  pixels->show();
+}
+
 void setup() {
 
-    Serial.begin(9600);
-    //Serial.println("hola");
+    Serial.begin(57600);
+
+    Serial.println("Starting setup");
+
+    pinMode(LEDPIN, OUTPUT);
+    pixels->begin();
+    pixels->setBrightness(8);
+    for(int i=0; i<NUMPIXELS; i++) {
+      pixels->setPixelColor(i, orangeColor);
+    }
+    pixels->show();
+
+    modeHandler = new ModeHandler(os, pixels);
+    permanentConnection = new PermanentConnection(pixels, configModeCallback);
+
     //os->addProcess(blink, 1000); // Run blink every 1000 ms
     os->addProcess(permanentConnection);
     os->addProcess(ota); // Run ota as fast as possible
     os->addProcess(clockUpdater, 10 * 60 * 1000); // Run every 10 minutes
     os->addProcess(modeHandler);
 
-    pinMode(BUTTONPIN,INPUT);
+    pinMode(BUTTONPIN, INPUT);
     attachInterrupt(BUTTONPIN, modeHandlerInterupt, FALLING);
+
+
 }
 
 void loop() {
     os->handle();
-    //Serial.println("test");
 }

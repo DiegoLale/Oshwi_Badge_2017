@@ -20,19 +20,38 @@
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 #include <WiFiManager.h>
+#include <Adafruit_NeoPixel.h>
+
+
+typedef void (* redLedCallbackFn)(WiFiManager* w);
 
 class PermanentConnection : public Process
 {
   public:
+    PermanentConnection(Adafruit_NeoPixel *pixels, redLedCallbackFn redLedCallback) {
+      _pixels = pixels;
+      this->redLedCallback = redLedCallback;
+    }
+
     void setup()
     {
 
       pinMode(PIN, INPUT_PULLUP);
-      String apName = String("Oshwi_") + String(ESP.getChipId());
-      delay(1000);
-      if (digitalRead(PIN))
+
+      unsigned int pushCounter = 0;
+      // Si se pulsa el botón durante el primer segundo, directamente activamos el web server
+      for(int i=0; i<1000; i++) {
+        if(digitalRead(PIN) == LOW) {
+          pushCounter++;
+          delay(1);
+        }
+      }
+      wifiManager.setAPCallback(this->redLedCallback); // si no consigue conectar y salta la config de ip, se activan los leds en rojo
+      wifiManager.setConfigPortalTimeout(120); // si a los 3 minutos no se configuró la wifi, continúa el programa
+      if (pushCounter < 10) {
         wifiManager.autoConnect("Oshwdem");
-      else
+      } else {
+        String apName = String("Oshwi_") + String(ESP.getChipId());
         if (!wifiManager.startConfigPortal(apName.c_str(), _password)) {
           Serial.println("failed to connect and hit timeout");
           delay(3000);
@@ -40,6 +59,7 @@ class PermanentConnection : public Process
           ESP.reset();
           delay(5000);
         }
+      }
     }
 
     void loop(){}
@@ -48,4 +68,6 @@ class PermanentConnection : public Process
     const int PIN = 0;
     WiFiManager wifiManager;
     const char* _password = "12345678";
+    Adafruit_NeoPixel* _pixels;
+    redLedCallbackFn redLedCallback;
 };

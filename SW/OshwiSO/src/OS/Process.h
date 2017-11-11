@@ -30,8 +30,8 @@ class Process {
       void setInterval(unsigned int);
 
    protected:
-      unsigned long _lastRun =0;
-      unsigned int _interval=0;
+      unsigned long _lastRun = 0;
+      unsigned int _interval = 0;
 };
 
 #endif
