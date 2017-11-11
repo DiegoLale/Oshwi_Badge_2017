@@ -36,6 +36,7 @@ class PermanentConnection : public Process
     void setup()
     {
 
+      Serial.println("Starting push button check");
       pinMode(PIN, INPUT_PULLUP);
 
       unsigned int pushCounter = 0;
@@ -43,22 +44,42 @@ class PermanentConnection : public Process
       for(int i=0; i<1000; i++) {
         if(digitalRead(PIN) == LOW) {
           pushCounter++;
-          delay(1);
         }
+        delay(1);
       }
+      Serial.println("Finished push button check");
       wifiManager.setAPCallback(this->redLedCallback); // si no consigue conectar y salta la config de ip, se activan los leds en rojo
       wifiManager.setConfigPortalTimeout(120); // si a los 3 minutos no se configuró la wifi, continúa el programa
+      String apName = String("Oshwi_") + String(ESP.getChipId());
       if (pushCounter < 10) {
-        wifiManager.autoConnect("Oshwdem");
+
+        for (int j=0; j<5; j++)
+        {
+          _pixels->setPixelColor(j, _pixels->Color(0,0,255));
+        }
+        _pixels->show();
+
+        WiFi.mode(WIFI_STA);
+        WiFi.begin("Oshwdem");
+
+        while (WiFi.status() != WL_CONNECTED) {
+          delay(500);
+          Serial.print(".");
+        }
       } else {
-        String apName = String("Oshwi_") + String(ESP.getChipId());
-        if (!wifiManager.startConfigPortal(apName.c_str(), _password)) {
+          for (int j=0; j<5; j++)
+          {
+            _pixels->setPixelColor(j, _pixels->Color(255,255,255));
+          }
+          _pixels->show();
+        wifiManager.autoConnect(apName.c_str(), _password);
+  /*      if (!wifiManager.startConfigPortal(apName.c_str(), _password)) {
           Serial.println("failed to connect and hit timeout");
           delay(3000);
           //reset and try again, or maybe put it to deep sleep
           ESP.reset();
           delay(5000);
-        }
+        +}*/
       }
     }
 
