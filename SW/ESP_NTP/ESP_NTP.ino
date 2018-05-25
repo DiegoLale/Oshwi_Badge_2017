@@ -208,7 +208,7 @@ void printTime(secodsWithMillis extTime)
 secodsWithMillis get_NTP_seconds()
 {
   secodsWithMillis millisSince1990;
-  int cb;
+  int cb = 0;
   int startQueringTime;
   int endQueringTime;
 
