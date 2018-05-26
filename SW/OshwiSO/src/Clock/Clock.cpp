@@ -67,6 +67,13 @@ bool Clock::updateTime()
   udp.read(packetBuffer, NTP_PACKET_SIZE); // read the packet into the buffer
   udp.stop();
 
+  // Check for server error in Leap Indicator (LI) First 2 bits.
+  if (packetBuffer[0] & 0b11000000)
+  {
+    Serial.println("WARNING: NTP server not sync.");
+    return false;
+  }
+
   //the timestamp starts at byte 40 of the received packet and is four bytes,
   // or two words, long. First, esxtract the two words:
 
